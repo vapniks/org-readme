@@ -1740,13 +1740,13 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
     ;; with text extracted from Readme.org
     (goto-start)
     (when (re-search-forward "^;;;[ \t]*Commentary:?[ \t]*$" nil t)
-      (skip-chars-forward "\n")
+      (forward-line 1)
       (let ((pt (point)))
 	(when (re-search-forward org-readme-end-section-regexp nil t)
 	  (goto-char (match-beginning 0))
-	  (skip-chars-backward "\n")
+	  (forward-line 0)
 	  (delete-region pt (point))
-	  (insert "\n" readme "\n"))))))
+	  (insert readme))))))
 
 (defun org-readme-get-emacswiki-name ()
   "Gets emacswiki-style name based on buffer."
