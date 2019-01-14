@@ -22,9 +22,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
 ;;; Commentary: 
-
 ;; 
-;; Using org-readme
+;;; Using org-readme
 ;; Org readme is used to:
 ;; 
 ;; - Create/Update a "History" section in the Readme.org based on the changelog
@@ -66,11 +65,11 @@
 ;; When `org-readme-sync' is called in a `Readme.org' file that is not a
 ;; single lisp file, the function exports the readme in EmacsWiki format
 ;; and posts it to the EmacsWiki.
-;;  EmacsWiki Page Names
+;;;; EmacsWiki Page Names
 ;; EmacsWiki Page names are generated from the file.  `org-readme.el'
 ;; would generate a page of OrgReadme.
 ;; 
-;;  Why each required library is needed
+;;;; Why each required library is needed
 ;; There are a few required libraries.  This is a list of the require
 ;; libraries and why they are needed.
 ;; 
@@ -83,13 +82,10 @@
 ;; | lib-requires     | To generate the library dependencies                                |
 ;; | auto-document    | To generate list of commands & options within elisp file (optional) |
 ;; |------------------+---------------------------------------------------------------------|
-;;  Notes
+;;;; Notes
 ;; If you use `auto-insert' you may need to change your elisp 
 ;; entry of `auto-insert-alist' so that the end of the header section 
 ;; matches `org-readme-end-section-regexp'
-;; 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Commands:
 ;;
@@ -1716,7 +1712,11 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 				["#.*" ""] ;remove all org #+KEYWORDS
 				["^[ \t]*[A-Z]+:[ \t]*\\[[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}.*" ""]
 				["^:" ""] ;remove : at beginning of lines
-				["^[ \t]*\\*+ Commentary" ""]
+				["^[ \t]*\\*+ Commentary" ""] ;remove Commentary line (this already exists in elisp file)
+				["^\\*" ";;;"] ;replace *'s with ;'s to keep outline structure
+				["^\\(;*\\)\\*" "\\1;"]   ;second *
+				["^\\(;*\\)\\*" "\\1;"]   ;third *
+				["^\\(;*\\)\\*" "\\1;"]   ;fourth *
 				["^[ \t]*\\*+" ""]]) ;remove *'s from beginning of lines
       ;; remove all TODO items
       (goto-start)
@@ -1734,7 +1734,7 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
       (delete-region (point) (point-max))
       (insert "\n")
       ;; comment all lines with ;;
-      (org-readme-regexp-pairs [["^\\(.?\\)" ";; \\1"]])
+      (org-readme-regexp-pairs [["^\\([^;]\\)" ";; \\1"]])
       (setq readme (buffer-string)))
     ;; delete current "Commentary" region in elisp file, and replace
     ;; with text extracted from Readme.org
