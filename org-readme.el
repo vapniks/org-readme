@@ -1628,10 +1628,13 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 		  (replace-match (format "\\1%s"
 					 (+ 1 (string-to-number (match-string 2)))))))))))
       ;; Replace commentary section in elisp file with text extracted from readme file
-      ;; (if this file doesn't yet exist it will be created and `org-readme-default-template' inserted)
+      ;; (if this file doesn't yet exist it will be created and `org-readme-default-template' inserted).
+      ;; The user will be prompted to save the existing Commentary section to the kill ring.
       (when (org-readme-check-opt org-readme-add-readme-to-lisp-file)
 	(message "Adding Readme to Header Commentary")
-	(org-readme-to-commentary))
+	(if (called-interactively-p 'any)
+	    (call-interactively 'org-readme-to-commentary)
+	  (org-readme-to-commentary)))
       ;; Document commands and options in elisp file
       (when (and (require 'auto-document nil t)
 		 (org-readme-check-opt org-readme-use-autodoc))
