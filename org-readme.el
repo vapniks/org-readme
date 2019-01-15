@@ -1588,6 +1588,7 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 		   (message "Posting Description to emacswiki")
 		   (org-readme-convert-to-emacswiki))))
       (if (and (not comment-added)
+	       (eq major-mode 'emacs-lisp-mode)
 	       (org-readme-check-opt org-readme-update-changelog))
 	  ;; Update the Changelog file if necessary (and set `comment-added' to t)
 	  (progn
