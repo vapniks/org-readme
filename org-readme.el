@@ -1570,6 +1570,10 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
   (let ((base (org-readme-guess-package-name))
 	(single-lisp-file (org-readme-single-lisp-p))
 	addmelpa addelget melpa elget)
+    ;; Check that we are either in the Readme.org file or an elisp file
+    (unless (or (org-readme-in-readme-org-p)
+		(eq major-mode 'emacs-lisp-mode))
+      (error "Cannot run `org-readme-sync' from this buffer"))
     ;; Check if we need to switch file or update the changelog first
     ;; (`comment-added' should be nil unless this function was called internally)
     (if (and (not comment-added)
