@@ -1600,105 +1600,105 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 	    ;; `org-readme-sync' will be called again with `comment-added' set to t
 	    (org-readme-edit))
 	;; Otherwise, make sure we are in the elisp file
-	(if (org-readme-in-readme-org-p)
+	(if (not (eq major-mode 'emacs-lisp-mode))
 	    (if single-lisp-file
 		(find-file single-lisp-file)
-	      (error "Can't find elisp file")))
-	;; Add autoload's
-	(when (and (not org-readme-added-autoloads)
-		   (y-or-n-p "Add autoloads? "))
-	  (org-readme-add-autoloads))
-	;; Update required features section
-	(org-readme-update-required-features-section)
-	;; Update last update & version number
-	(unless comment-added (org-readme-update-last-update))
-	(when (y-or-n-p "Update version number? ")
-	  (save-excursion
-	    (goto-start)
-	    (let ((case-fold-search t))
-	      (when (re-search-forward "^[ \t]*;+[ \t]*Version:" nil t)
-		(if (or (org-readme-check-opt org-readme-use-melpa-versions)
-			(save-match-data (looking-at "[ \t]*[0-9]\\{8\\}[.][0-9]\\{2,4\\}[ \t]*$")))
-		    (progn
-		      (delete-region (point) (point-at-eol))
-		      (insert (concat " " (format-time-string "%Y%m%d." (current-time))
-				      (format "%d" (or (string-to-number (format-time-string "%H%M" (current-time))) 0)))))
-		  (end-of-line)
-		  (when (looking-back "\\([ .]\\)\\([0-9]+\\)[ \t]*")
-		    (replace-match (format "\\1%s"
-					   (+ 1 (string-to-number (match-string 2)))))))))))
-	;; Replace commentary section in elisp file with text extracted from readme file
-	(when (org-readme-check-opt org-readme-add-readme-to-lisp-file)
-	  (message "Adding Readme to Header Commentary")
-	  (org-readme-to-commentary))
-	;; Document commands and options in elisp file
-	(when (and (require 'auto-document nil t)
-		   (org-readme-check-opt org-readme-use-autodoc))
-	  (message "Updating using autodoc.")
-	  (org-readme-insert-autodoc (org-readme-check-opt org-readme-add-autodoc-to-readme)))
-	;; Add functions section to readme file
-	(when (org-readme-check-opt org-readme-add-functions-to-readme)
-	  (message "Updating Functions.")
-	  (org-readme-insert-functions))
-	;; Add variables section to readme file
-	(when (org-readme-check-opt org-readme-add-variables-to-readme)
-	  (message "Updating Variables.")
-	  (org-readme-insert-variables))
-	;; Add Changelog to readme file
-	(when (org-readme-check-opt org-readme-add-changelog-to-readme)
-	  (message "Updating Changelog in current file.")
-	  (org-readme-changelog-to-readme))
-	;; Copy top header from elisp file into readme file
-	(when (org-readme-check-opt org-readme-add-top-header-to-readme)
-	  (org-readme-top-header-to-readme))
-	;; save the elisp buffer before moving on
-	(save-buffer)
-	;; Create info documentation
-	(when (org-readme-check-opt org-readme-build-info)
-	  (org-readme-gen-info))
-	;; Create .tar archive
-	(when (and (or (executable-find "tar")
-		       (executable-find "7z")
-		       (executable-find "7za"))
-		   (org-readme-check-opt org-readme-create-tar-package))
-	  (org-readme-create-tar-archive))
-	;; post to marmalade
-	(when (and (featurep 'http-post-simple)
-		   (org-readme-check-opt org-readme-sync-marmalade))
-	  (message "Attempting to post to marmalade-repo.org")
-	  (org-readme-marmalade-post))
-	;; post to elisp file to emacswiki
-	(when (and (featurep 'yaoddmuse)
-		   (org-readme-check-opt org-readme-sync-emacswiki "Post elisp file to emacswiki?"))
-	  (message "Posting elisp file to emacswiki")
-	  (emacswiki-post nil ""))
-	;; add melpa recipe if necessary
-	(setq addmelpa (org-readme-check-opt org-readme-build-melpa-recipe))
-	(when addmelpa
-	  (setq melpa (org-readme-build-melpa))
-	  (when (and (require 'package-build nil t)
-		     (file-directory-p package-build-recipes-dir))
-	    (let ((melpa2 (expand-file-name (org-readme-guess-package-name)
-					    package-build-recipes-dir)))
-	      (if (file-writable-p melpa2)
-		  (copy-file melpa melpa2 t)
-		(error "Can't write to %s" package-build-recipes-dir)))))
-	;; add el-get recipe if necessary
-	(setq addelget (org-readme-check-opt org-readme-build-el-get-recipe))
-	(when addelget (setq elget (org-readme-build-el-get)))
-	;; add files to git repo, along with MELPA and el-get recipes
-	(when (org-readme-check-opt org-readme-sync-git)
-	  ;; TODO: allow creation of melpa and el-get recipes without syncing to git?
-	  (org-readme-git melpa elget))
-	;; post readme file to emacswiki
-	(when (and (featurep 'yaoddmuse)
-		   (org-readme-check-opt org-readme-sync-emacswiki "Post Readme.org to emacswiki?"))
-	  (message "Posting Description to emacswiki")
-	  (org-readme-convert-to-emacswiki))
-	;; revert the window config back to how it was before
-	(when org-readme-edit-last-window-configuration
-	  (set-window-configuration org-readme-edit-last-window-configuration)
-	  (setq org-readme-edit-last-window-configuration nil))))))
+	      (error "Can't find elisp file"))))
+      ;; Add autoload's
+      (when (and (not org-readme-added-autoloads)
+		 (y-or-n-p "Add autoloads? "))
+	(org-readme-add-autoloads))
+      ;; Update required features section
+      (org-readme-update-required-features-section)
+      ;; Update last update & version number
+      (unless comment-added (org-readme-update-last-update))
+      (when (y-or-n-p "Update version number? ")
+	(save-excursion
+	  (goto-start)
+	  (let ((case-fold-search t))
+	    (when (re-search-forward "^[ \t]*;+[ \t]*Version:" nil t)
+	      (if (or (org-readme-check-opt org-readme-use-melpa-versions)
+		      (save-match-data (looking-at "[ \t]*[0-9]\\{8\\}[.][0-9]\\{2,4\\}[ \t]*$")))
+		  (progn
+		    (delete-region (point) (point-at-eol))
+		    (insert (concat " " (format-time-string "%Y%m%d." (current-time))
+				    (format "%d" (or (string-to-number (format-time-string "%H%M" (current-time))) 0)))))
+		(end-of-line)
+		(when (looking-back "\\([ .]\\)\\([0-9]+\\)[ \t]*")
+		  (replace-match (format "\\1%s"
+					 (+ 1 (string-to-number (match-string 2)))))))))))
+      ;; Replace commentary section in elisp file with text extracted from readme file
+      (when (org-readme-check-opt org-readme-add-readme-to-lisp-file)
+	(message "Adding Readme to Header Commentary")
+	(org-readme-to-commentary))
+      ;; Document commands and options in elisp file
+      (when (and (require 'auto-document nil t)
+		 (org-readme-check-opt org-readme-use-autodoc))
+	(message "Updating using autodoc.")
+	(org-readme-insert-autodoc (org-readme-check-opt org-readme-add-autodoc-to-readme)))
+      ;; Add functions section to readme file
+      (when (org-readme-check-opt org-readme-add-functions-to-readme)
+	(message "Updating Functions.")
+	(org-readme-insert-functions))
+      ;; Add variables section to readme file
+      (when (org-readme-check-opt org-readme-add-variables-to-readme)
+	(message "Updating Variables.")
+	(org-readme-insert-variables))
+      ;; Add Changelog to readme file
+      (when (org-readme-check-opt org-readme-add-changelog-to-readme)
+	(message "Updating Changelog in current file.")
+	(org-readme-changelog-to-readme))
+      ;; Copy top header from elisp file into readme file
+      (when (org-readme-check-opt org-readme-add-top-header-to-readme)
+	(org-readme-top-header-to-readme))
+      ;; save the elisp buffer before moving on
+      (save-buffer)
+      ;; Create info documentation
+      (when (org-readme-check-opt org-readme-build-info)
+	(org-readme-gen-info))
+      ;; Create .tar archive
+      (when (and (or (executable-find "tar")
+		     (executable-find "7z")
+		     (executable-find "7za"))
+		 (org-readme-check-opt org-readme-create-tar-package))
+	(org-readme-create-tar-archive))
+      ;; post to marmalade
+      (when (and (featurep 'http-post-simple)
+		 (org-readme-check-opt org-readme-sync-marmalade))
+	(message "Attempting to post to marmalade-repo.org")
+	(org-readme-marmalade-post))
+      ;; post to elisp file to emacswiki
+      (when (and (featurep 'yaoddmuse)
+		 (org-readme-check-opt org-readme-sync-emacswiki "Post elisp file to emacswiki?"))
+	(message "Posting elisp file to emacswiki")
+	(emacswiki-post nil ""))
+      ;; add melpa recipe if necessary
+      (setq addmelpa (org-readme-check-opt org-readme-build-melpa-recipe))
+      (when addmelpa
+	(setq melpa (org-readme-build-melpa))
+	(when (and (require 'package-build nil t)
+		   (file-directory-p package-build-recipes-dir))
+	  (let ((melpa2 (expand-file-name (org-readme-guess-package-name)
+					  package-build-recipes-dir)))
+	    (if (file-writable-p melpa2)
+		(copy-file melpa melpa2 t)
+	      (error "Can't write to %s" package-build-recipes-dir)))))
+      ;; add el-get recipe if necessary
+      (setq addelget (org-readme-check-opt org-readme-build-el-get-recipe))
+      (when addelget (setq elget (org-readme-build-el-get)))
+      ;; add files to git repo, along with MELPA and el-get recipes
+      (when (org-readme-check-opt org-readme-sync-git)
+	;; TODO: allow creation of melpa and el-get recipes without syncing to git?
+	(org-readme-git melpa elget))
+      ;; post readme file to emacswiki
+      (when (and (featurep 'yaoddmuse)
+		 (org-readme-check-opt org-readme-sync-emacswiki "Post Readme.org to emacswiki?"))
+	(message "Posting Description to emacswiki")
+	(org-readme-convert-to-emacswiki))
+      ;; revert the window config back to how it was before
+      (when org-readme-edit-last-window-configuration
+	(set-window-configuration org-readme-edit-last-window-configuration)
+	(setq org-readme-edit-last-window-configuration nil)))))
 
 ;;;###autoload
 (defun org-readme-to-commentary ()
