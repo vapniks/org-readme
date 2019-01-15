@@ -1628,6 +1628,7 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 		  (replace-match (format "\\1%s"
 					 (+ 1 (string-to-number (match-string 2)))))))))))
       ;; Replace commentary section in elisp file with text extracted from readme file
+      ;; (if this file doesn't yet exist it will be created and `org-readme-default-template' inserted)
       (when (org-readme-check-opt org-readme-add-readme-to-lisp-file)
 	(message "Adding Readme to Header Commentary")
 	(org-readme-to-commentary))
@@ -1701,9 +1702,10 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 	(setq org-readme-edit-last-window-configuration nil)))))
 
 ;;;###autoload
-(defun org-readme-to-commentary ()
-  "Replace Commentary section in elisp file with text from Readme.org."
-  (interactive)
+(defun org-readme-to-commentary (&optional savetokr)
+  "Replace Commentary section in elisp file with text from Readme.org.
+If SAVETOKR is non-nil then save the existing Commentary section to the `kill-ring'."
+  (interactive (list (y-or-n-p "Save existing Commentary section to kill ring? ")))
   (let ((readme (org-readme-find-readme)) p1)
     (with-temp-buffer
       (insert-file-contents readme)
@@ -1749,7 +1751,7 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 	(when (re-search-forward org-readme-end-section-regexp nil t)
 	  (goto-char (match-beginning 0))
 	  (forward-line 0)
-	  (delete-region pt (point))
+	  (funcall (if savetokr 'kill-region 'delete-region) pt (point))
 	  (insert readme))))))
 
 (defun org-readme-get-emacswiki-name ()
