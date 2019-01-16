@@ -5,11 +5,11 @@
 ;; Author: Matthew L. Fidler
 ;; Maintainer: Joe Bloggs <vapniks@yahoo.com>
 ;; Created: Fri Aug  3 22:33:41 2012 (-0500)
-;; Version: 20190116.1740
+;; Version: 20190116.1813
 ;; Package-Requires: ((http-post-simple "1.0") (yaoddmuse "0.1.1")(header2 "21.0") (lib-requires "21.0") (cl-lib "0.5"))
-;; Last-Updated: Wed Jan 16 17:40:11 2019
+;; Last-Updated: Wed Jan 16 18:13:14 2019
 ;;           By: Joe Bloggs
-;;     Update #: 810
+;;     Update #: 814
 ;; URL: https://github.com/vapniks/org-readme
 ;; Keywords: Header2, Readme.org, Emacswiki, Git
 ;; Compatibility: Tested with Emacs 24.1 on Windows.
@@ -132,7 +132,7 @@
 ;;    Convert Readme.org to markdown Readme.md.
 ;;    Keybinding: M-x org-readme-convert-to-markdown
 ;;  `org-readme-convert-to-emacswiki'
-;;    Converts Readme.org to oddmuse markup and uploads to emacswiki.
+;;    Convert Readme.org to oddmuse markup and upload to emacswiki.
 ;;    Keybinding: M-x org-readme-convert-to-emacswiki
 ;;  `org-readme-git'
 ;;    Add current file and other relevant files to git.
@@ -266,6 +266,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
 ;;; Change Log:
+;; 16-Jan-2019    Joe Bloggs  
+;;    Last-Updated: Wed Jan 16 18:06:06 2019 #812 (Joe Bloggs)
+;;    A few minor changes
 ;; 30-Nov-2015    Joe Bloggs  
 ;;    Last-Updated: Mon Nov 30 19:45:19 2015 #807 (Joe Bloggs)
 ;;    Add melpa recipe to package-build-recipes-dir
@@ -846,7 +849,7 @@ Markdown which is an intermediary for texinfo (using pandoc)."
   "Query user if option OPT is 'prompt, or OVERRIDE is non-nil otherwise return OPT.
 If PROMPT is supplied use that for the prompt, otherwise use
 the first sentence of the docstring for OPT."
-  `(if (eq ,opt 'prompt)
+  `(if (or ,override (eq ,opt 'prompt))
        (y-or-n-p (or ,prompt
 		     (replace-regexp-in-string
 		      "\n.*" ""
