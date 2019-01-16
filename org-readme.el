@@ -1233,7 +1233,8 @@ Returns file name if created."
 
 ;;;###autoload
 (defun org-readme-convert-to-markdown ()
-  "Convert Readme.org to markdown Readme.md."
+  "Convert Readme.org to markdown Readme.md.
+If called with a prefix arg always prompt for options." 
   (interactive)
   (let ((readme (org-readme-find-readme))
         (markdown "Readme.md")
@@ -1301,7 +1302,7 @@ Returns file name if created."
 	(end-of-line)
 	(save-restriction
 	  (narrow-to-region p1 (point))
-	  (if (org-readme-check-opt org-readme-use-pandoc-markdown)
+	  (if (org-readme-check-opt org-readme-use-pandoc-markdown nil current-prefix-arg)
 	      (org-readme-regexp-pairs [["^\\([ \t]*\\)|\\(-.*?-\\)|\\([ \t]*\\)$" "\\1+\\2+\\3"]])
 	    (if (featurep 'org-html)
 		(org-replace-region-by-html (point-min) (point-max))
@@ -1404,9 +1405,10 @@ Returns file name if created."
   "Add current file and other relevant files to git.
 If ADDMELPA and/or ADDELGET are non-nil then add a melpa/el-get recipe,
 and either of these arguments are filepaths then use those files as the
-recipes."
-  (interactive (list (org-readme-check-opt org-readme-build-melpa-recipe)
-		     (org-readme-check-opt org-readme-build-el-get-recipe)))
+recipes.
+If called with a prefix arg always prompt for options."
+  (interactive (list (org-readme-check-opt org-readme-build-melpa-recipe nil current-prefix-arg)
+		     (org-readme-check-opt org-readme-build-el-get-recipe nil current-prefix-arg)))
   (let* ((base (org-readme-guess-package-name))
 	 (texifile (concat base ".texi"))
 	 (infofile (concat base ".info"))
@@ -1438,11 +1440,11 @@ recipes."
       (gitadd (file-name-nondirectory (org-readme-find-readme)))
       ;; add either .info or .texi file, and delete Readme.md if necessary
       (when (file-exists-p texifile)
-	(when (and (org-readme-check-opt org-readme-drop-markdown-after-build-texi)
+	(when (and (org-readme-check-opt org-readme-drop-markdown-after-build-texi nil current-prefix-arg)
 		   (file-exists-p "Readme.md"))
 	  (gitrm "Readme.md"))
 	;; add either the info & dir files or the texifile
-	(if (and (org-readme-check-opt org-readme-drop-texi-after-build-info)
+	(if (and (org-readme-check-opt org-readme-drop-texi-after-build-info nil current-prefix-arg)
 		 (file-exists-p infofile))
 	    (progn (gitadd infofile)
 		   (if (file-exists-p (expand-file-name
@@ -1489,7 +1491,8 @@ If so, return the name of that Lisp file, otherwise return nil."
 
 ;;;###autoload
 (defun org-readme-gen-info ()
-  "With the proper tools, generate an info and dir from the current readme.org."
+  "With the proper tools, generate an info and dir from the current readme.org.
+If called with a prefix arg always prompt for options."
   (interactive)
   (if (not (executable-find "pandoc"))
       (error "Can't find pandoc executable"))
@@ -1531,7 +1534,7 @@ If so, return the name of that Lisp file, otherwise return nil."
       (when (executable-find "install-info")
 	(shell-cmd-concat "install-info --dir-file=dir " base ".info"))))
   ;; remove the markdown file as it is no longer needed
-  (when (org-readme-check-opt org-readme-drop-markdown-after-build-texi)
+  (when (org-readme-check-opt org-readme-drop-markdown-after-build-texi nil current-prefix-arg)
     (delete-file "Readme.md")))
 
 (defun org-readme-create-tar-archive nil
@@ -1575,7 +1578,7 @@ If so, return the name of that Lisp file, otherwise return nil."
 (defun org-readme-sync (&optional comment-added)
   "Syncs Readme.org with current buffer.
 When COMMENT-ADDED is non-nil, the comment has been added and the syncing should begin.
-If called with a prefix arg all options will be prompted for."
+If called with a prefix arg always prompt for options."
   (interactive)
   ;; Store the name of the package in `base'
   (let ((base (org-readme-guess-package-name))
