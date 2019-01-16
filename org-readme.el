@@ -235,6 +235,17 @@
 ;;    List of sections to remove when changing the Readme.org to 
 ;;    default = (quote ("Functions & macros" "Variables"))
 
+;;; Installation:
+;;
+;; Put org-readme.el in a directory in your load-path, e.g. ~/.emacs.d/
+;; You can add a directory to your load-path with the following line in ~/.emacs
+;; (add-to-list 'load-path (expand-file-name "~/elisp"))
+;; where ~/elisp is the directory you want to add 
+;; (you don't need to do this for ~/.emacs.d - it's added by default).
+;;
+;; Add the following to your ~/.emacs startup file.
+;;
+;; (require 'org-readme)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
@@ -613,15 +624,14 @@
 (defcustom org-readme-default-template "
 * Installation
 
-To use without using a package manager:
+To make sure you have the most up-to-date version of this library it is best to install 
+using the emacs package system, with the appropriate repository added (e.g https://melpa.org/)
 
- - Put the library in a directory in the emacs load path, like ~/.emacs.d
+To install without using a package manager:
+
+ - Put the library in a directory in the emacs load path, like ~/.emacs.d/
  - Add (require 'LIB-NAME) in your ~/.emacs file
- - If you have [[http://www.marmalade-repo.org/][marmalade-repo.org]], this LIB-NAME is part of the emacs packges you can install.  Just type M-x package-install LIB-NAME marmalade 
 
-This is in emacswiki, so this package can also be installed using el-get.
-
-After installing el-get, Type M-x el-get-install LIB-NAME.
 "
   "Default template for blank Readme.org Files. LIB-NAME is replaced with the library."
   :type 'string

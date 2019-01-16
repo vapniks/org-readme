@@ -17,6 +17,15 @@
  - Keywords :: Header2, Readme.org, Emacswiki, Git
  - Compatibility :: Tested with Emacs 24.1 on Windows.
 
+* Installation
+
+To make sure you have the most up-to-date version of this library it is best to install 
+using the emacs package system, with the appropriate repository added (e.g https://melpa.org/)
+
+To install without using a package manager:
+
+ - Put the library in a directory in the emacs load path, like ~/.emacs.d/
+ - Add (require 'LIB-NAME) in your ~/.emacs file
 
 * Possible Dependencies
 
