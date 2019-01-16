@@ -7,9 +7,9 @@
 ;; Created: Fri Aug  3 22:33:41 2012 (-0500)
 ;; Version: 20151130.1948
 ;; Package-Requires: ((http-post-simple "1.0") (yaoddmuse "0.1.1")(header2 "21.0") (lib-requires "21.0") (cl-lib "0.5"))
-;; Last-Updated: Mon Nov 30 19:47:56 2015
+;; Last-Updated: Wed Jan 16 02:02:37 2019
 ;;           By: Joe Bloggs
-;;     Update #: 808
+;;     Update #: 809
 ;; URL: https://github.com/mlf176f2/org-readme
 ;; Keywords: Header2, Readme.org, Emacswiki, Git
 ;; Compatibility: Tested with Emacs 24.1 on Windows.
@@ -17,7 +17,7 @@
 ;;
 ;; Features that might be required by this library:
 ;;
-;;   yaoddmuse http-post-simple org-html auto-document
+;;   cl-lib yaoddmuse http-post-simple org-html auto-document
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
@@ -826,8 +826,8 @@ Markdown which is an intermediary for texinfo (using pandoc)."
 (defvar-local org-readme-added-autoloads nil
   "Whether autoload's have been added yet.")
 
-(cl-defmacro org-readme-check-opt (opt &optional prompt)
-  "Query user if option OPT is 'prompt, otherwise return OPT.
+(cl-defmacro org-readme-check-opt (opt &optional prompt override)
+  "Query user if option OPT is 'prompt, or OVERRIDE is non-nil otherwise return OPT.
 If PROMPT is supplied use that for the prompt, otherwise use
 the first sentence of the docstring for OPT."
   `(if (eq ,opt 'prompt)
@@ -1574,7 +1574,8 @@ If so, return the name of that Lisp file, otherwise return nil."
 ;;;###autoload
 (defun org-readme-sync (&optional comment-added)
   "Syncs Readme.org with current buffer.
-When COMMENT-ADDED is non-nil, the comment has been added and the syncing should begin."
+When COMMENT-ADDED is non-nil, the comment has been added and the syncing should begin.
+If called with a prefix arg all options will be prompted for."
   (interactive)
   ;; Store the name of the package in `base'
   (let ((base (org-readme-guess-package-name))
@@ -1597,12 +1598,14 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 			  (setq org-readme-edit-last-buffer (current-buffer))
 			  (org-readme-sync))
 		 ;; otherwise there are several elisp files so just post Readme.org to emacswiki if necessary
-		 (unless (not (org-readme-check-opt org-readme-sync-emacswiki
-						    "Post Readme.org to emacswiki without changes"))
+		 (unless (not (org-readme-check-opt
+			       org-readme-sync-emacswiki
+			       "Post Readme.org to emacswiki without changes"
+			       current-prefix-arg))
 		   (message "Posting Description to emacswiki")
 		   (org-readme-convert-to-emacswiki))))
       (if (and (not comment-added)
-	       (org-readme-check-opt org-readme-update-changelog))
+	       (org-readme-check-opt org-readme-update-changelog nil current-prefix-arg))
 	  ;; Update the Changelog file if necessary (and set `comment-added' to t)
 	  (progn
 	    (setq org-readme-edit-last-buffer (current-buffer))
@@ -1627,7 +1630,7 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 	  (goto-start)
 	  (let ((case-fold-search t))
 	    (when (re-search-forward "^[ \t]*;+[ \t]*Version:" nil t)
-	      (if (or (org-readme-check-opt org-readme-use-melpa-versions)
+	      (if (or (org-readme-check-opt org-readme-use-melpa-versions nil current-prefix-arg)
 		      (save-match-data (looking-at "[ \t]*[0-9]\\{8\\}[.][0-9]\\{2,4\\}[ \t]*$")))
 		  (progn
 		    (delete-region (point) (point-at-eol))
@@ -1640,54 +1643,65 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
       ;; Replace commentary section in elisp file with text extracted from readme file
       ;; (if this file doesn't yet exist it will be created and `org-readme-default-template' inserted).
       ;; The user will be prompted to save the existing Commentary section to the kill ring.
-      (when (org-readme-check-opt org-readme-add-readme-to-lisp-file)
+      (when (org-readme-check-opt org-readme-add-readme-to-lisp-file nil current-prefix-arg)
 	(message "Adding Readme to Header Commentary")
 	(if (called-interactively-p 'any)
 	    (call-interactively 'org-readme-to-commentary)
 	  (org-readme-to-commentary)))
       ;; Document commands and options in elisp file
       (when (and (require 'auto-document nil t)
-		 (org-readme-check-opt org-readme-use-autodoc))
+		 (org-readme-check-opt
+		  org-readme-use-autodoc nil current-prefix-arg))
 	(message "Updating using autodoc.")
-	(org-readme-insert-autodoc (org-readme-check-opt org-readme-add-autodoc-to-readme)))
+	(org-readme-insert-autodoc
+	 (org-readme-check-opt org-readme-add-autodoc-to-readme nil current-prefix-arg)))
       ;; Add functions section to readme file
-      (when (org-readme-check-opt org-readme-add-functions-to-readme)
+      (when (org-readme-check-opt
+	     org-readme-add-functions-to-readme nil current-prefix-arg)
 	(message "Updating Functions.")
 	(org-readme-insert-functions))
       ;; Add variables section to readme file
-      (when (org-readme-check-opt org-readme-add-variables-to-readme)
+      (when (org-readme-check-opt
+	     org-readme-add-variables-to-readme nil current-prefix-arg)
 	(message "Updating Variables.")
 	(org-readme-insert-variables))
       ;; Add Changelog to readme file
-      (when (org-readme-check-opt org-readme-add-changelog-to-readme)
+      (when (org-readme-check-opt
+	     org-readme-add-changelog-to-readme nil current-prefix-arg)
 	(message "Updating Changelog in current file.")
 	(org-readme-changelog-to-readme))
       ;; Copy top header from elisp file into readme file
-      (when (org-readme-check-opt org-readme-add-top-header-to-readme)
+      (when (org-readme-check-opt
+	     org-readme-add-top-header-to-readme nil current-prefix-arg)
 	(org-readme-top-header-to-readme))
       ;; save the elisp buffer before moving on
       (save-buffer)
       ;; Create info documentation
-      (when (org-readme-check-opt org-readme-build-info)
+      (when (org-readme-check-opt
+	     org-readme-build-info nil current-prefix-arg)
 	(org-readme-gen-info))
       ;; Create .tar archive
       (when (and (or (executable-find "tar")
 		     (executable-find "7z")
 		     (executable-find "7za"))
-		 (org-readme-check-opt org-readme-create-tar-package))
+		 (org-readme-check-opt
+		  org-readme-create-tar-package nil current-prefix-arg))
 	(org-readme-create-tar-archive))
       ;; post to marmalade
       (when (and (featurep 'http-post-simple)
-		 (org-readme-check-opt org-readme-sync-marmalade))
+		 (org-readme-check-opt
+		  org-readme-sync-marmalade nil current-prefix-arg))
 	(message "Attempting to post to marmalade-repo.org")
 	(org-readme-marmalade-post))
       ;; post to elisp file to emacswiki
       (when (and (featurep 'yaoddmuse)
-		 (org-readme-check-opt org-readme-sync-emacswiki "Post elisp file to emacswiki?"))
+		 (org-readme-check-opt
+		  org-readme-sync-emacswiki "Post elisp file to emacswiki?" current-prefix-arg))
 	(message "Posting elisp file to emacswiki")
 	(emacswiki-post nil ""))
       ;; add melpa recipe if necessary
-      (setq addmelpa (org-readme-check-opt org-readme-build-melpa-recipe))
+      (setq addmelpa (org-readme-check-opt
+		      org-readme-build-melpa-recipe nil current-prefix-arg))
       (when addmelpa
 	(setq melpa (org-readme-build-melpa))
 	(when (and (require 'package-build nil t)
@@ -1698,15 +1712,19 @@ When COMMENT-ADDED is non-nil, the comment has been added and the syncing should
 		(copy-file melpa melpa2 t)
 	      (error "Can't write to %s" package-build-recipes-dir)))))
       ;; add el-get recipe if necessary
-      (setq addelget (org-readme-check-opt org-readme-build-el-get-recipe))
+      (setq addelget (org-readme-check-opt
+		      org-readme-build-el-get-recipe nil current-prefix-arg))
       (when addelget (setq elget (org-readme-build-el-get)))
       ;; add files to git repo, along with MELPA and el-get recipes
-      (when (org-readme-check-opt org-readme-sync-git)
+      (when (org-readme-check-opt
+	     org-readme-sync-git nil current-prefix-arg)
 	;; TODO: allow creation of melpa and el-get recipes without syncing to git?
 	(org-readme-git melpa elget))
       ;; post readme file to emacswiki
       (when (and (featurep 'yaoddmuse)
-		 (org-readme-check-opt org-readme-sync-emacswiki "Post Readme.org to emacswiki?"))
+		 (org-readme-check-opt
+		  org-readme-sync-emacswiki
+		  "Post Readme.org to emacswiki?" current-prefix-arg))
 	(message "Posting Description to emacswiki")
 	(org-readme-convert-to-emacswiki))
       ;; revert the window config back to how it was before
