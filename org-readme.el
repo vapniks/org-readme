@@ -3,14 +3,14 @@
 ;; Filename: org-readme.el
 ;; Description: Integrate Readme.org and Commentary/Change Logs.
 ;; Author: Matthew L. Fidler
-;; Maintainer: Matthew L. Fidler
+;; Maintainer: Joe Bloggs <vapniks@yahoo.com>
 ;; Created: Fri Aug  3 22:33:41 2012 (-0500)
-;; Version: 20151130.1948
+;; Version: 20190116.1740
 ;; Package-Requires: ((http-post-simple "1.0") (yaoddmuse "0.1.1")(header2 "21.0") (lib-requires "21.0") (cl-lib "0.5"))
-;; Last-Updated: Wed Jan 16 02:02:37 2019
+;; Last-Updated: Wed Jan 16 17:40:11 2019
 ;;           By: Joe Bloggs
-;;     Update #: 809
-;; URL: https://github.com/mlf176f2/org-readme
+;;     Update #: 810
+;; URL: https://github.com/vapniks/org-readme
 ;; Keywords: Header2, Readme.org, Emacswiki, Git
 ;; Compatibility: Tested with Emacs 24.1 on Windows.
 ;;
@@ -22,6 +22,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
 ;;; Commentary: 
+;; 
+;;; Installation
+;; 
+;; To make sure you have the most up-to-date version of this library it is best to install 
+;; using the emacs package system, with the appropriate repository added (e.g https://melpa.org/)
+;; 
+;; To install without using a package manager:
+;; 
+;;  - Put the library in a directory in the emacs load path, like ~/.emacs.d/
+;;  - Add (require 'LIB-NAME) in your ~/.emacs file
 ;; 
 ;;; Using org-readme
 ;; Org readme is used to:
@@ -100,6 +110,12 @@
 ;;  `org-readme-insert-variables'
 ;;    Extracts variable documentation and places it in the readme file.
 ;;    Keybinding: M-x org-readme-insert-variables
+;;  `org-readme-build-el-get'
+;;    Builds an el-get recipe. This assumes github, though others could be added.
+;;    Keybinding: M-x org-readme-build-el-get
+;;  `org-readme-build-melpa'
+;;    Builds a melpa recipe. This assumes github, though other could be added.
+;;    Keybinding: M-x org-readme-build-melpa
 ;;  `org-readme-marmalade-post'
 ;;    Posts the current buffer to Marmalade.
 ;;    Keybinding: M-x org-readme-marmalade-post
@@ -146,7 +162,7 @@
 ;;
 ;;  `org-readme-default-template'
 ;;    Default template for blank Readme.org Files. LIB-NAME is replaced with the library.
-;;    default = "\n* Installation\n\nTo use without using a package manager:\n\n - Put the library in a directory in the emacs load path, like ~/.emacs.d\n - Add (require 'LIB-NAME) in your ~/.emacs file\n - If you have [[http://www.marmalade-repo.org/][marmalade-repo.org]], this LIB-NAME is part of the emacs packges you can install.  Just type M-x package-install LIB-NAME marmalade \n\nThis is in emacswiki, so this package can also be installed using el-get.\n\nAfter installing el-get, Type M-x el-get-install LIB-NAME.\n"
+;;    default = "\n* Installation\n\nTo make sure you have the most up-to-date version of this library it is best to install \nusing the emacs package system, with the appropriate repository added (e.g https://melpa.org/)\n\nTo install without using a package manager:\n\n - Put the library in a directory in the emacs load path, like ~/.emacs.d/\n - Add (require 'LIB-NAME) in your ~/.emacs file\n\n"
 ;;  `org-readme-end-section-regexp'
 ;;    Regexp to match the end of a header/comments/changelog section in the elisp file comments.
 ;;    default = "^;;;;+[ 	]*$"
@@ -1315,12 +1331,12 @@ If called with a prefix arg always prompt for options."
 
 ;;;###autoload
 (defun org-readme-convert-to-emacswiki ()
-  "Converts Readme.org to oddmuse markup and uploads to emacswiki."
+  "Convert Readme.org to oddmuse markup and upload to emacswiki."
   (interactive)
   (let ((readme (org-readme-find-readme))
         (what (file-name-nondirectory (buffer-file-name)))
         (wiki (org-readme-get-emacswiki-name))
-        tmp tmp2) 
+        tmp tmp2)
     (with-temp-buffer
       (insert-file-contents readme)
       ;; Take out CamelCase Links

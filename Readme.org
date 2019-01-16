@@ -107,6 +107,12 @@ matches =org-readme-end-section-regexp=
    - *org-readme-insert-variables* :
     Extracts variable documentation and places it in the readme file.\\
     Keybinding: =M-x org-readme-insert-variables=
+   - *org-readme-build-el-get* :
+    Builds an el-get recipe. This assumes github, though others could be added.\\
+    Keybinding: =M-x org-readme-build-el-get=
+   - *org-readme-build-melpa* :
+    Builds a melpa recipe. This assumes github, though other could be added.\\
+    Keybinding: =M-x org-readme-build-melpa=
    - *org-readme-marmalade-post* :
     Posts the current buffer to Marmalade.\\
     Keybinding: =M-x org-readme-marmalade-post=
@@ -153,7 +159,7 @@ matches =org-readme-end-section-regexp=
 
    - *org-readme-default-template* :
     Default template for blank Readme.org Files. LIB-NAME is replaced with the library.\\
-    default value: =\n* Installation\n\nTo use without using a package manager:\n\n - Put the library in a directory in the emacs load path, like ~/.emacs.d\n - Add (require 'LIB-NAME) in your ~/.emacs file\n - If you have [[http://www.marmalade-repo.org/][marmalade-repo.org]], this LIB-NAME is part of the emacs packges you can install.  Just type M-x package-install LIB-NAME marmalade \n\nThis is in emacswiki, so this package can also be installed using el-get.\n\nAfter installing el-get, Type M-x el-get-install LIB-NAME.\n=
+    default value: =\n* Installation\n\nTo make sure you have the most up-to-date version of this library it is best to install \nusing the emacs package system, with the appropriate repository added (e.g https://melpa.org/)\n\nTo install without using a package manager:\n\n - Put the library in a directory in the emacs load path, like ~/.emacs.d/\n - Add (require 'LIB-NAME) in your ~/.emacs file\n\n=
    - *org-readme-end-section-regexp* :
     Regexp to match the end of a header/comments/changelog section in the elisp file comments.\\
     default value: =^+[ 	]*$=
