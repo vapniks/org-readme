@@ -1760,13 +1760,48 @@ If called with a prefix arg always prompt for options."
 	  (setq org-readme-edit-last-window-configuration nil))))))
 
 ;;;###autoload
-(defun org-readme-to-commentary (&optional savetokr)
+(defun org-readme-to-commentary (&optional keepexisting)
   "Replace Commentary section in elisp file with text from Readme.org.
-If SAVETOKR is non-nil then save the existing Commentary section to the `kill-ring'."
-  (interactive (list (y-or-n-p "Save existing Commentary section to kill ring? ")))
-  (let ((readme (org-readme-find-readme)) p1)
+If KEEPEXISTING is non-nil then copy the existing Commentary section to Readme.org"
+  (interactive (list (and (= (length (directory-files
+				      (file-name-directory (buffer-file-name))
+				      t "^[Rr][Ee][Aa][Dd][Mm][Ee][.][Oo][Rr][Gg]$"))
+			     0)
+			  (y-or-n-p "Add existing Commentary section to Readme.org? "))))
+  (let ((readmefile (org-readme-find-readme))
+	newcommentary oldcommentary p1)
+    ;; Delete current "Commentary" region of elisp file
+    (goto-start)
+    (when (re-search-forward "^;;;[ \t]*Commentary:?[ \t]*$" nil t)
+      (forward-line 1)
+      (let ((pt (point)))
+	(when (re-search-forward org-readme-end-section-regexp nil t)
+	  (goto-char (match-beginning 0))
+	  (forward-line 0)
+	  (setq oldcommentary (buffer-substring-no-properties pt (point)))
+	  ;; save the old commentary section to the `kill-ring' if its not saved to Readme.org
+	  (funcall (if keepexisting 'delete-region 'kill-region) pt (point)))))
+    ;; if this is a new Readme.org copy existing commentary section to it
+    (unless (not keepexisting)
+      (mapc (lambda (x)
+	      (setq oldcommentary
+		    (replace-regexp-in-string (car x) (cdr x) oldcommentary)))
+	    '(("^;; *" . "")
+	      ("^;" . "*")
+	      ("^;" . "*")
+	      ("^;" . "*")
+	      ("`\\(.*?\\)'" . "=\\1=")))
+      (with-temp-file readmefile
+	(insert-file-contents readmefile)
+	(goto-char (point-min))
+	;; place the Commentary from the elisp file after any Commentary section in the Readme.org file
+	(if (and (re-search-forward "^\\* [cC]ommentary" nil t)
+		 (re-search-forward "^\\* " nil t))
+	    (forward-line -1)
+	  (goto-char (point-max)))
+	(insert oldcommentary)))
     (with-temp-buffer
-      (insert-file-contents readme)
+      (insert-file-contents readmefile)
       (org-mode)
       ;; remove some sections
       (mapc (lambda (section) (org-readme-remove-section section))
@@ -1799,18 +1834,9 @@ If SAVETOKR is non-nil then save the existing Commentary section to the `kill-ri
       (insert "\n")
       ;; comment all lines with ;;
       (org-readme-regexp-pairs [["^\\([^;]\\)" ";; \\1"]])
-      (setq readme (buffer-string)))
-    ;; delete current "Commentary" region in elisp file, and replace
-    ;; with text extracted from Readme.org
-    (goto-start)
-    (when (re-search-forward "^;;;[ \t]*Commentary:?[ \t]*$" nil t)
-      (forward-line 1)
-      (let ((pt (point)))
-	(when (re-search-forward org-readme-end-section-regexp nil t)
-	  (goto-char (match-beginning 0))
-	  (forward-line 0)
-	  (funcall (if savetokr 'kill-region 'delete-region) pt (point))
-	  (insert readme))))))
+      (setq newcommentary (buffer-string)))
+    ;; insert text extracted from Readme.org into elisp file
+    (insert newcommentary)))
 
 (defun org-readme-get-emacswiki-name ()
   "Gets emacswiki-style name based on buffer."
